@@ -66,6 +66,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.apache.commons.cli.*;
 import org.lateralgm.components.GmMenuBar;
 import org.lateralgm.components.GmTreeGraphics;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -489,21 +490,100 @@ public final class LGM
 		populateTree();
 		splashProgress.progress(90,Messages.getString("LGM.SPLASH_PLUGINS")); //$NON-NLS-1$
 		loadPlugins();
-		if (args.length != 0)
+
+		Options cliOptions = new Options();
+		Option uriOption = new Option("u", "uri", true, "Some stuff involving a listener and a splash screen");
+		cliOptions.addOption(uriOption);
+		Option exportScriptsOption = new Option("s", "exportScripts", false, "Export all the .gml scripts in the --exportOutput dir.");
+		cliOptions.addOption(exportScriptsOption);
+		Option exportOutputDir = new Option("e", "exportOutputDir", true, "Directory in which to export the game's .gml scripts.");
+		cliOptions.addOption(exportOutputDir);
+		Option exportScriptExtension = new Option("x", "exportScriptExtension", true, "File extension to be appended to the generated script files.");
+		cliOptions.addOption(exportScriptExtension);
+
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+		CommandLine cli;
+		try
+		{
+			cli = parser.parse(cliOptions, args);
+
+			Boolean exportScripts = cli.hasOption("exportScripts");
+			if (exportScripts)
 			{
-			splashProgress.progress(95,Messages.getString("LGM.SPLASH_PRELOAD")); //$NON-NLS-1$
-			try
+				ExportInfo.setExportScripts(true);
+				if (cli.hasOption("exportOutputDir"))
 				{
-				Listener.getInstance().fc.open(new URI(args[0]));
+					ExportInfo.setExportDir(cli.getOptionValue("exportOutputDir"));
+					ExportInfo.setFileExtension(cli.getOptionValue("exportScriptExtension", ExportInfo.DEFAULT_SCRIPT_FILE_EXTENSION));
 				}
-			catch (URISyntaxException e)
+				else
 				{
-				e.printStackTrace();
+					System.out.println("exportOutputDir must be set to export scripts.");
+					ExportInfo.setExportScripts(false);
 				}
 			}
+			else
+				ExportInfo.setExportScripts(false);
+
+			if (args.length != 0)
+			{
+				splashProgress.progress(95,Messages.getString("LGM.SPLASH_PRELOAD")); //$NON-NLS-1$
+				try
+				{
+					//Listener.getInstance().fc.open(new URI(args[0]));
+					String uri = cli.getOptionValue("uri");
+					if (uri != null && !uri.isEmpty())
+						Listener.getInstance().fc.open(new URI(uri));
+				}
+				catch (URISyntaxException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		catch (ParseException ex)
+		{
+			System.out.println(ex.getMessage());
+			formatter.printHelp("LGM", cliOptions);
+		}
+
 		splashProgress.complete();
 		frame.setVisible(true);
 		}
+
+	public static final class ExportInfo
+	{
+		public static final String DEFAULT_SCRIPT_FILE_EXTENSION = ".gml";
+		private static String exportDir;
+		private static String fileExtension;
+		private static Boolean exportScripts;
+
+		public static String getExportDir()
+		{
+			return exportDir;
+		}
+		public static void setExportDir(String exportDir)
+		{
+			ExportInfo.exportDir = exportDir;
+		}
+		public static String getFileExtension()
+		{
+			return fileExtension;
+		}
+		public static void setFileExtension(String fileExtension)
+		{
+			ExportInfo.fileExtension = fileExtension;
+		}
+		public static Boolean getExportScripts()
+		{
+			return exportScripts;
+		}
+		public static void setExportScripts(Boolean exportScripts)
+		{
+			ExportInfo.exportScripts = exportScripts;
+		}
+	}
 
 	static final class SplashProgress
 		{

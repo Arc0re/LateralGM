@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="JoshEdit">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../JoshEdit/out/artifacts/JoshEdit_jar/JoshEdit.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

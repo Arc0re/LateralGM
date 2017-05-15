@@ -14,6 +14,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.io.InputStream;
 import java.net.URI;
@@ -25,6 +26,7 @@ import java.util.zip.DataFormatException;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile.ResourceHolder;
 import org.lateralgm.file.iconio.ICOFile;
+import org.lateralgm.main.LGM;
 import org.lateralgm.main.Util;
 import org.lateralgm.messages.Messages;
 import org.lateralgm.resources.Background;
@@ -747,12 +749,21 @@ public final class GmFileReader
 				}
 			Script scr = f.resMap.getList(Script.class).add();
 			scr.setName(in.readStr());
+
 			if (ver == 800) in.skip(8); //last changed
 			ver = in.read4();
 			if (ver != 400 && ver != 800) throw versionError(f,"IN","SCR",i,ver); //$NON-NLS-1$ //$NON-NLS-2$
 			String code = in.readStr();
 			scr.put(PScript.CODE,code);
 
+			if (LGM.ExportInfo.getExportScripts())
+			{
+				//System.out.println(scr.getName());
+				try (PrintWriter printWriter = new PrintWriter(LGM.ExportInfo.getExportDir() + scr.getName() + LGM.ExportInfo.getFileExtension()))
+				{
+					printWriter.println(scr.getCode());
+				}
+			}
 			in.endInflate();
 			}
 		}
