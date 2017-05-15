@@ -1,3 +1,16 @@
+Modified GameMaker project load/source code editor with options to export GML (GameMaker Language) scripts
+to files.
+
+This is done via the command line parameters (for now?):
+    -s, -exportScripts          -> Export all the .gml scripts in the --exportOutput dir.
+    -e, -exportOutputDir        -> Directory in which to export the game's .gml scripts. (String)
+    -x, -exportScriptExtension  -> File extension to be appended to the generated script files. (String)
+
+    This one is for legacy reason, the project used to use args[0], now I'm using commons-cli, so I rewrote that.
+    -u, -uri                    -> Some stuff involving a listener and a splash screen (String)
+
+
+
 Credits:
 IsmAvatar <IsmAvatar@gmail.com> as project leader, lead programmer, file format expert,
  philosopher, project politics, and most publicity (both research and release).
